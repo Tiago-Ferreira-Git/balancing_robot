@@ -40,8 +40,9 @@ void encoder_callback(uint gpio, uint32_t events){
 }
 
 
-void setup() {
 
+void setup() {
+  //stdio_init_all();  
   Serial.begin(19200);
 
   pinMode(motor_right.IN, OUTPUT);
@@ -59,45 +60,14 @@ void setup() {
 
   // If the delay is > 0 then this is the delay between the previous callback ending and the next starting.
   // If the delay is < 0 then the next call to the callback will be exactly   500ms after the
-  add_repeating_timer_ms( -100, sampling, NULL,&timer); //100 Hz
+  add_repeating_timer_ms( -1, sampling, NULL,&timer); //100 Hz
   gpio_set_irq_enabled_with_callback(motor_right.encoder, GPIO_IRQ_EDGE_RISE , true, &encoder_callback);
-
-
-
 
   bool initialized = false;
 
-	// Try to initialize!
-	if (!mpu.begin()) {
-		Serial.println("Failed to find MPU6050 chip");
-		while (!mpu.begin()) {
-      Serial.println("Failed to find MPU6050 chip");
-		  delay(10);
-		}
-	}
-  Serial.println("MPU6050 Found!");
+  mpu.calibration(6,false);
 
-  mpu.setTemperatureStandby(true);
-
-  mpu_accel = mpu.getAccelerometerSensor();
-  mpu_accel->printSensorDetails();
-
-  mpu_gyro = mpu.getGyroSensor();
-  mpu_gyro->printSensorDetails();
-
-	// set accelerometer range to +-8G
-	mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
-
-	// set gyro range to +- 500 deg/s
-	mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-
-	// set filter bandwidth to 21 Hz
-	mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
-
-
-
-
-	delay(100);
+  delay(100);
 
 }
 
@@ -105,16 +75,32 @@ void setup() {
 
 void loop() {
 
+  
+
   if( timer_fired ){
     timer_fired = false;
     digitalWrite(motor_a, (int) bit);
     digitalWrite(motor_b, (int) !bit);
     bit = !bit;
 
-    mpu_accel->getEvent(&accel);
-    mpu_gyro->getEvent(&gyro);
+    mpu.read_values();
 
 
+    Serial.print("Acceleration_X:");
+    Serial.print(mpu.accel[0]);
+    Serial.print(" Acceleration_Y:");
+    Serial.print(mpu.accel[1]);
+    Serial.print(" Acceleration_Z:");
+    Serial.println(mpu.accel[2]);
     
+    Serial.print("Gyro_X:");
+    Serial.print(mpu.gyro[0]);
+    Serial.print(" Gyro_Y:");
+    Serial.print(mpu.gyro[1]);
+    Serial.print(" Gyro_Z:");
+    Serial.println(mpu.gyro[2]);
+
   }
 }
+
+

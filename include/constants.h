@@ -7,10 +7,8 @@
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
 #include "Arduino.h"
-#include <Wire.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
 #include "motor.h"
+#include "mpu6050.h"
 
 
 #define PS_PIN 23 // Power Save Pin, H to disable, L default
@@ -40,13 +38,10 @@ volatile int check_rotation = 0;
 
 volatile long int next = 0;
 
-Adafruit_MPU6050 mpu;
-Adafruit_Sensor  *mpu_accel, *mpu_gyro;
 
-sensors_event_t accel;
-sensors_event_t gyro;
 
 motor motor_right(motor_a,encoder_a);
 motor motor_left(motor_b,encoder_b);
 
+mpu6050 mpu(0x68);
 #endif
