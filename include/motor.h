@@ -1,7 +1,6 @@
 #ifndef _motor_H_
 #define _motor_H_
 
-
 #include "Arduino.h"
 
 class motor
@@ -10,14 +9,18 @@ private:
     
     
 public:
-    uint8_t IN = 0; //pwm pin to control motor speed that 
-    uint8_t encoder = 0; //encoder pin to measure speed
-    volatile float prev = 0;
-    volatile float vel = 0;
+    uint8_t IN_1 = 0; //pwm pin to control motor speed that 
+    uint8_t IN_2 = 0; //pwm pin to control motor speed that 
+    uint8_t encoder_a = 0; //encoder pin to measure speed
+    uint8_t encoder_b = 0; //encoder pin to measure speed
+    double vel = 0;
+    volatile long  int next = 0;
+    volatile long int prev = 0;
+    volatile long int diff = 0;
     /*
         * @brief Costructor for class motor: atributes the parameters when the class is called to the private variables of the class
     */
-    explicit motor(uint8_t IN1_,uint8_t encoder_);
+    explicit motor(uint8_t ,uint8_t ,uint8_t ,uint8_t );
     ~motor(){}
     /*
         * @brief Sets direction of motor
@@ -27,13 +30,16 @@ public:
         
     */
     void set_direction(float ,float);
+
     /*
-        * @brief Compute the integrator term of the controller
+        * @brief Call back to measure speed
         *
-        * @param error the difference between reference and the value measured
-        * @param saturation_error difference between clipped control signal and the "real" control signal (if anti_windup is true)
-        * 
-        * @returns The value of integrator term with set point weighting (uses parameters anti_windup, K , Ti, Tt )
+        * @param The gpio that trigers the interruption
+        * @param The event that triggers the interruption
+        
+    */
+   void encoder_callback(uint , uint32_t );
+    /*
     */
 
 };

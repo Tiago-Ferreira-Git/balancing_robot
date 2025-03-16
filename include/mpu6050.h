@@ -16,6 +16,7 @@ public:
     uint8_t i2c_addr = 0x68; //i2c adress default: 0x68
     float gyro[3] = {0.0,0.0,0.0};
     float accel[3] = {0.0,0.0,0.0};
+    float angle[3] = {0.0,0.0,0.0};
 
     /*
         * @brief Costructor for class mpu6050: atributes the parameters when the class is called to the private variables of the class.

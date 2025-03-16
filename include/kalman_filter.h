@@ -1,40 +1,52 @@
-#ifndef _motor_H_
-#define _motor_H_
-
+#ifndef _kalman_filter_H_
+#define _kalman_filter_H_
 
 #include "Arduino.h"
 
-class motor
+
+class kalman
 {
 private:
-    
-    
+    float x_pred = 0.0;
+    //model
+    float A = 1;
+    float B = 0;
+
+    float Q = 2;
+    float R = 1;
+
 public:
-    uint8_t IN = 0; //pwm pin to control motor speed that 
-    uint8_t encoder = 0; //encoder pin to measure speed
-    volatile float prev = 0;
-    volatile float vel = 0;
+    float h = 0.0; //sampling time
+    float K = 0.0; 
+    float P_pred = 0.0;
+    float P_meas = 0.0;
+    float x = 0.0;
+
     /*
-        * @brief Costructor for class motor: atributes the parameters when the class is called to the private variables of the class
+        * @brief Costructor for class mpu6050: atributes the parameters when the class is called to the private variables of the class.
     */
-    explicit motor(uint8_t IN1_,uint8_t encoder_);
-    ~motor(){}
+    explicit kalman(float );
+    ~kalman(){}
     /*
-        * @brief Sets direction of motor
+        * @brief Resets the MPU6050 chip.
         *
         * @param The Pico pin corresponding to the IN1 H motor bridge pin
         * @param The Pico pin corresponding to the IN2 H motor bridge pin
         
     */
-    void set_direction(float ,float);
+    void predict(float u);
     /*
-        * @brief Compute the integrator term of the controller
+
+        * @brief Writes the value "val" in the register "register".
         *
-        * @param error the difference between reference and the value measured
-        * @param saturation_error difference between clipped control signal and the "real" control signal (if anti_windup is true)
-        * 
-        * @returns The value of integrator term with set point weighting (uses parameters anti_windup, K , Ti, Tt )
+        * @param Register to be written
+        * @param Value to be written
+        
     */
+    void update(float y);
+
+
+    void verbose();
 
 };
 
