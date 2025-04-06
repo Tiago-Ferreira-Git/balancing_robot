@@ -26,5 +26,7 @@ To set up the development environment:
 
 
 ## To do
-
-Add interface using with https://asciiflow.com  
+- Get an aluminium bar;
+- Get wheels;
+- Do a PCB;
+-  
