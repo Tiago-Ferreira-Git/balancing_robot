@@ -2,11 +2,13 @@
 
 #include "kalman_filter.h"
 
-kalman::kalman(float h_){
+kalman::kalman(float A_,float B_,float Q_,float R_){
 
-    h = h_;
-
-    B = h;
+    //h = h_;
+    A = A_;
+    B = B_;
+    Q = Q_;
+    R = R_;
 
 }
 
@@ -34,6 +36,8 @@ void kalman::update(float y){
     P_pred = (1-K)*P_pred;
 
     x = x_pred;
+
+    //Serial.print("Printing Kalman filter Error:");Serial.println(y-x_pred);
 
 
 

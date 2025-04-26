@@ -41,8 +41,8 @@ float PID::control(float REF, float sensor_value){
   v = P + I;
   // + D;
 
-  if( v < -2000 ) u = -2000;
-  else if( v > 2000 ) u = 2000;
+  if( v < -1000 ) u = -1000;
+  else if( v > 1000 ) u = 1000;
   else u = v;
   saturation_error = u-v;
   I += integrator(error,saturation_error); //back calculation slide 19
@@ -50,7 +50,7 @@ float PID::control(float REF, float sensor_value){
   // P = u;
   // D = v;
 
-  u = map(u, -2000, 2000, 0, 1000);
+  //u = map(u, -1500, 1500, 0, 1000);
   return u;
 }
 

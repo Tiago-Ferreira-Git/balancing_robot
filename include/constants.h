@@ -47,19 +47,22 @@ int encoder_b  = 17;
 
 
 motor motor_right(1,0,encoder_a,encoder_b,20);
-motor motor_left(2,3,6,7,21);
+motor motor_left(3,2,6,7,21);
 
 mpu6050 mpu(0x68);
 
-kalman roll((float) h/1000),pitch((float) h/1000);
+kalman roll(1,(float) h/1000,2,1);
+
+kalman left_velocity( 0.927699109413340,7.491278366739943,4,1);
 
 double REF = 0.0;
 int automatic_ref = 1;
-double K = 10.0;
-double Ti = 1.0;
-double ad = 0.0;
-int duty = 0;
-PID pid(K, Ti, 0, 0, 0, (float) h/1000, 0); // K Ti Td N b h Tt
+int duty_left = 0;
+int duty_right = 0;
+
+
+PID pid_left(1, 0.1, 0, 0, 0, (float) h/1000, 0); // K Ti Td N b h Tt
+PID pid_right(2, 0.15, 0, 0, 0, (float) h/1000, 0); // K Ti Td N b h Tt
 
 
 boolean newData = false;
@@ -69,6 +72,12 @@ char receivedChars[numChars];   // an array to store the received data
 
 
 spin_lock_t *slk {0};
+
+
+
+// K_left Ti_left ad_left K_right Ti_right ad_right
+double parameters[6] = {1,0.1,0 , 2,0.15,0};
+
 #endif
 
 

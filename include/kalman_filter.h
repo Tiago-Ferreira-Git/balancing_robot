@@ -7,25 +7,24 @@
 class kalman
 {
 private:
-    float x_pred = 0.0;
     //model
-    float A = 1;
+    float A = 0;
     float B = 0;
 
-    float Q = 2;
-    float R = 1;
-
+    float Q = 0;
+    float R = 0;
 public:
+    float x_pred = 0.0;
     float h = 0.0; //sampling time
     float K = 0.0; 
-    float P_pred = 0.0;
-    float P_meas = 0.0;
+    float P_pred = 10000.0;
+    float P_meas = 10000.0;
     float x = 0.0;
 
     /*
         * @brief Costructor for class mpu6050: atributes the parameters when the class is called to the private variables of the class.
     */
-    explicit kalman(float );
+    explicit kalman(float,float,float,float );
     ~kalman(){}
     /*
         * @brief Resets the MPU6050 chip.

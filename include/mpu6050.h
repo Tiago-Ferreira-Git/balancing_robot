@@ -69,14 +69,7 @@ public:
 
     void std(int n,bool flag_accel);
     uint8_t debug(uint8_t );
-    /*
-        * @brief Compute the integrator term of the controller
-        *
-        * @param error the difference between reference and the value measured
-        * @param saturation_error difference between clipped control signal and the "real" control signal (if anti_windup is true)
-        * 
-        * @returns The value of integrator term with set point weighting (uses parameters anti_windup, K , Ti, Tt )
-    */
+
 
 };
 

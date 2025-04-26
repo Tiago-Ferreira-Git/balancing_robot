@@ -33,7 +33,7 @@ public:
         * @param The Pico pin corresponding to the IN2 H motor bridge pin
         
     */
-    void set_direction(float ,float);
+    void set_direction(bool);
 
     /*
         * @brief Call back to measure speed
@@ -45,6 +45,8 @@ public:
    void encoder_callback(uint , uint32_t );
     /*
     */
+   void set_speed(float );
+
 
 };
 
