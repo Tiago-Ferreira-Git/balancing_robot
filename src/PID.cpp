@@ -2,7 +2,7 @@
 #include "PID.h"
 
 
-PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_){
+PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_,float limit_){
   K = K_;
   Ti = Ti_;
   Td = Td_; 
@@ -12,6 +12,7 @@ PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_
   Tt = Tt_;
   ad = Td/(Td+N*h);
   bd = Td*K*N/(Td+N*h);
+  limit = limit_;
 }
 
 float PID::proporcional(float REF,float y){
@@ -41,8 +42,8 @@ float PID::control(float REF, float sensor_value){
   v = P + I;
   // + D;
 
-  if( v < -1000 ) u = -1000;
-  else if( v > 1000 ) u = 1000;
+  if( v < -limit ) u = -limit;
+  else if( v > limit ) u = limit;
   else u = v;
   saturation_error = u-v;
   I += integrator(error,saturation_error); //back calculation slide 19
@@ -51,6 +52,8 @@ float PID::control(float REF, float sensor_value){
   // D = v;
 
   //u = map(u, -1500, 1500, 0, 1000);
+
+
   return u;
 }
 

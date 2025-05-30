@@ -107,9 +107,9 @@ void loop() {
     bit = !bit;
     if (bit && automatic_ref){
       //bit = !bit;
-      REF = 400.0;
+      //REF = 400.0;
     }else if(!bit && automatic_ref){
-      REF = -400.0;
+      //REF = -400.0;
     }
   }
 
@@ -134,37 +134,50 @@ void loop() {
     
     // left_velocity.predict(12.0*duty_left/1000);
     // left_velocity.update(motor_left.vel);
+
     
     
     duty_left = pid_left.control(REF,motor_left.vel);
     duty_right = pid_right.control(REF,motor_right.vel);
+    
 
+    if (std::abs(mpu.angle[0]) > 10){
+      duty_left = 0;
+      duty_right = 0;
+    }
     motor_left.set_speed(duty_left);
     motor_right.set_speed(duty_right);
     
+    count++;
+    if (count == h_outer) {
+      if (std::abs(mpu.angle[0]) > 0)  REF = tilt.control(0,mpu.angle[0]);
+      else REF = 0;
+      REF = -REF/2;
+      Serial.print("Time:");Serial.print(time_stamp);Serial.print("\t");
+      Serial.print("Duty:");Serial.print(12.0*duty_left/1000);Serial.print("\t");
+      Serial.print("Right_motor:");
+      Serial.print(motor_right.vel);
+      Serial.print("\t");
+      Serial.print("Left_motor:");
+      Serial.print(motor_left.vel);
+      Serial.print("\t");
+      Serial.print("REF:");
+      Serial.print(REF);
+      Serial.print("\t");
+      Serial.print("Angle:");
+      Serial.print(roll.x);
+      Serial.print("\t");
+      Serial.print("Angle_raw:");
+      Serial.print(mpu.angle[0]);
+      Serial.print("\t");
+      Serial.print("Error:");
+      Serial.print(-roll.x);
+      Serial.println("\t");
+      time_stamp = time_stamp + h_outer/1000.0  ;
+      count = 0;
+    }
     
     
-    Serial.print("Time:");Serial.print(time_stamp);Serial.print("\t");
-    Serial.print("Duty:");Serial.print(12.0*duty_left/1000);Serial.print("\t");
-    Serial.print("Right_motor:");
-    Serial.print(motor_right.vel);
-    Serial.print("\t");
-    Serial.print("Left_motor:");
-    Serial.print(motor_left.vel);
-    Serial.print("\t");
-    Serial.print("REF:");
-    Serial.print(REF);
-    Serial.print("\t");
-    Serial.print("Angle:");
-    Serial.print(roll.x);
-    Serial.print("\t");
-    Serial.print("Angle_raw:");
-    Serial.print(mpu.angle[0]);
-    Serial.print("\t");
-    Serial.print("Angle_raw:");
-    Serial.print(mpu.angle[1]);
-    Serial.print("\t");
-    time_stamp = time_stamp + h/1000.0  ;
 
   }
 }

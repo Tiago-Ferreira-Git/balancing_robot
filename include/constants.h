@@ -34,7 +34,8 @@ volatile long int next = 0;
 volatile long int prev = 0;
 
 
-static int h = 10; //sampling time in ms
+static int h = 1; //sampling time in ms
+static int h_outer = 10*h;
 double time_stamp = 0;
 
 // IN1 gpio 20
@@ -47,7 +48,7 @@ int encoder_b  = 17;
 
 
 motor motor_right(1,0,encoder_a,encoder_b,20);
-motor motor_left(3,2,6,7,21);
+motor motor_left(2,3,7,6,21);
 
 mpu6050 mpu(0x68);
 
@@ -56,13 +57,16 @@ kalman roll(1,(float) h/1000,2,1);
 kalman left_velocity( 0.927699109413340,7.491278366739943,4,1);
 
 double REF = 0.0;
+
 int automatic_ref = 1;
 int duty_left = 0;
 int duty_right = 0;
 
 
-PID pid_left(1, 0.1, 0, 0, 0, (float) h/1000, 0); // K Ti Td N b h Tt
-PID pid_right(2, 0.15, 0, 0, 0, (float) h/1000, 0); // K Ti Td N b h Tt
+PID pid_left(1, 0.1, 0, 0, 0, (float) h/1000, 0,1000); // K Ti Td N b h Tt
+PID pid_right(2, 0.15, 0, 0, 0, (float) h/1000, 0,1000); // K Ti Td N b h Tt
+
+PID tilt(80, 30, 0, 0, 0, (float) h_outer/1000, 0,2000); // K Ti Td N b h Tt
 
 
 boolean newData = false;
@@ -77,6 +81,8 @@ spin_lock_t *slk {0};
 
 // K_left Ti_left ad_left K_right Ti_right ad_right
 double parameters[6] = {1,0.1,0 , 2,0.15,0};
+
+int count = 0;
 
 #endif
 

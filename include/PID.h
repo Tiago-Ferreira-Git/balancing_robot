@@ -15,6 +15,7 @@ class PID {
   float bd = 0;
   float Tt = 0;  // anti-windup gain
   float REF_old = 0;
+  float limit = 0;
   bool anti_windup = false;
 
  public:
@@ -23,7 +24,7 @@ class PID {
    * called to the private variables of the class
    */
   explicit PID(float K_, float Ti_, float Td_, float N_, float b_, float h_,
-               float Tt_);
+               float Tt_,float limit_);
   ~PID() {}
   /*
    * @brief Compute the proporcional term of the controller
