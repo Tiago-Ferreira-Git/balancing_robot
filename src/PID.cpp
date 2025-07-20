@@ -15,8 +15,8 @@ PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_
   limit = limit_;
 }
 
-float PID::proporcional(float REF,float y){
-  return K*(REF-y);
+float PID::proporcional(float error){
+  return K*error;
 }
 
 
@@ -38,7 +38,7 @@ float PID::control(float REF, float sensor_value){
   error = REF - sensor_value;
   
   //D = derivative(sensor_value);
-  P = proporcional(REF,sensor_value);
+  P = proporcional(error);
   v = P + I;
   // + D;
 

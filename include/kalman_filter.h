@@ -2,49 +2,71 @@
 #define _kalman_filter_H_
 
 #include "Arduino.h"
+#include <iostream>
+#include <Eigen/Dense>
+
+using Eigen::MatrixXd;
+
 
 
 class kalman
 {
 private:
-    //model
-    float A = 0;
-    float B = 0;
-
-    float Q = 0;
-    float R = 0;
+    // State transition matrix
+    MatrixXd A;
+    MatrixXd A_t;
+    // Control input matrix
+    MatrixXd B;
+    // Output matrix
+    MatrixXd C;
+    MatrixXd C_t;
+    // Process noise covariance matrix
+    MatrixXd Q;
+    // Measurement noise covariance matrix
+    MatrixXd R;
+    // State covariance matrix
+    MatrixXd P;
+    // Kalman gain matrix
+    MatrixXd L;
+    // Measurement covariance matrix
+    MatrixXd P_meas;
+    MatrixXd P_meas_inv;
+    
+    MatrixXd I;
+    
 public:
-    float x_pred = 0.0;
-    float h = 0.0; //sampling time
-    float K = 0.0; 
-    float P_pred = 10000.0;
-    float P_meas = 10000.0;
-    float x = 0.0;
+    // Predicted state vector
+    MatrixXd x_pred;
+
 
     /*
-        * @brief Costructor for class mpu6050: atributes the parameters when the class is called to the private variables of the class.
+        * @brief Constructor for class kalman: assigns the parameters to the private variables of the class.
+        *
+        * @param A State transition matrix
+        * @param B Control input matrix
+        * @param Q Process noise covariance matrix
+        * @param R Measurement noise covariance matrix
     */
-    explicit kalman(float,float,float,float );
+    explicit kalman(MatrixXd,MatrixXd,MatrixXd,MatrixXd,MatrixXd );
     ~kalman(){}
+
     /*
-        * @brief Resets the MPU6050 chip.
+        * @brief Predicts the next state and covariance based on the control input.
         *
-        * @param The Pico pin corresponding to the IN1 H motor bridge pin
-        * @param The Pico pin corresponding to the IN2 H motor bridge pin
-        
+        * @param u Control input vector
     */
-    void predict(float u);
+    void predict(MatrixXd u);
+
     /*
-
-        * @brief Writes the value "val" in the register "register".
+        * @brief Updates the state estimate and covariance using the measurement.
         *
-        * @param Register to be written
-        * @param Value to be written
-        
+        * @param y Measurement vector
     */
-    void update(float y);
+    void update(MatrixXd y);
 
-
+    /*
+        * @brief Prints the current Kalman filter matrices and state for debugging.
+    */
     void verbose();
 
 };

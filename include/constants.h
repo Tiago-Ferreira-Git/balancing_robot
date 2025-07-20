@@ -14,11 +14,18 @@
 #include "mpu6050.h"
 #include "kalman_filter.h"
 #include "PID.h"
+#include <iostream>
+#include <Eigen/Dense>
+#include "matrix_def.h"
+
+
+using namespace Eigen;
 
 #define PS_PIN 23 // Power Save Pin, H to disable, L default
+#define WHEEL_RADIUS 0.025
+
 
 const float motor_steps = 0.065;
-
 
 volatile bool timer_fired {false};
 
@@ -52,21 +59,19 @@ motor motor_left(2,3,7,6,21);
 
 mpu6050 mpu(0x68);
 
-kalman roll(1,(float) h/1000,2,1);
 
-kalman left_velocity( 0.927699109413340,7.491278366739943,4,1);
 
 double REF = 0.0;
 
-int automatic_ref = 1;
-int duty_left = 0;
+int automatic_ref = 0;
+int duty_left = 300;
 int duty_right = 0;
 
 
-PID pid_left(1, 0.1, 0, 0, 0, (float) h/1000, 0,1000); // K Ti Td N b h Tt
+PID pid_left(0.7, 0.08, 0, 0, 0, (float) h/1000, 0,1000); // K Ti Td N b h Tt
 PID pid_right(2, 0.15, 0, 0, 0, (float) h/1000, 0,1000); // K Ti Td N b h Tt
 
-PID tilt(80, 30, 0, 0, 0, (float) h_outer/1000, 0,2000); // K Ti Td N b h Tt
+PID tilt(25, 100000, 0, 0, 0, (float) h_outer/1000, 0,1000); // K Ti Td N b h Tt
 
 
 boolean newData = false;
@@ -83,6 +88,14 @@ spin_lock_t *slk {0};
 double parameters[6] = {1,0.1,0 , 2,0.15,0};
 
 int count = 0;
+
+double ref_angle = 0;
+
+kalman estimator(A, B, C , Q_e , R_e);
+
+Eigen::MatrixXd measurement = Eigen::MatrixXd::Zero(6, 1);
+Eigen::MatrixXd control_action = Eigen::MatrixXd::Zero(2, 1);
+
 
 #endif
 

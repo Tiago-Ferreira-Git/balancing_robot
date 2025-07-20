@@ -35,7 +35,7 @@ class PID {
    * @returns The value of proportional term with set point weighting (uses
    * parameters b and K)
    */
-  float proporcional(float, float);
+  float proporcional(float);
   /*
    * @brief Compute the integrator term of the controller
    *

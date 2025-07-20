@@ -22,9 +22,9 @@ void encoder_callback_core0(uint gpio, uint32_t events){
   if (!direction){
     multiplier =  -1.0;
   }
-  //0.8*motor_right.vel + (1-0.8)*  
-  motor_right.vel = multiplier*1000000*60/((next-motor_right.prev)*96/2);
+  motor_right.vel = multiplier*1000000*motor_steps/((next-motor_right.prev));
   motor_right.prev = next;
+
   
   return;
 }
@@ -43,13 +43,12 @@ void encoder_callback_core1(uint gpio, uint32_t events){
     multiplier =  -1.0;
   }
   uint32_t isr_state = spin_lock_blocking( slk );
-  //0.5095*motor_left.vel + 0.2452*(raw+
 
-  motor_left.vel = multiplier*1000000*60/((next-motor_left.prev)*96/2);
+  motor_left.vel = multiplier*1000000*motor_steps/((next-motor_left.prev));
 
   spin_unlock(slk, isr_state);
   motor_left.prev = next;
-  
+
   return;
 }
 
@@ -57,7 +56,7 @@ void encoder_callback_core1(uint gpio, uint32_t events){
 
 void setup() {
   //stdio_init_all();  
-  Serial.begin(74880);
+  Serial.begin(57600);
   
   
   
@@ -85,8 +84,9 @@ void setup() {
   digitalWrite(motor_right.IN_2, 0);
   digitalWrite(motor_left.IN_1, 0);
   digitalWrite(motor_left.IN_2, 1);
-  // pwm_set_chan_level(pwm_gpio_to_slice_num(motor_right.pwm), pwm_gpio_to_channel(motor_right.pwm), duty);
-  // pwm_set_chan_level(pwm_gpio_to_slice_num(motor_left.pwm), pwm_gpio_to_channel(motor_left.pwm), 0);
+
+
+
   delay(100);
   
 }
@@ -94,6 +94,30 @@ void setup() {
 void setup1(){
   gpio_set_irq_enabled_with_callback(motor_left.encoder_a, GPIO_IRQ_EDGE_RISE , true, &encoder_callback_core1);
 }
+
+
+
+void print_serial(){
+
+  Serial.print("Time:");Serial.print(time_stamp);Serial.print(" ");
+  //Serial.print("REF:");Serial.print(REF);Serial.print("\t");
+  Serial.print("Duty_left:");Serial.print(12.0*duty_left/1000);Serial.print(" ");
+  Serial.print("Duty_right:");Serial.print(12.0*duty_right/1000);Serial.print(" ");
+  Serial.print("Right_motor_velocity:");Serial.print(motor_right.vel);Serial.print(" ");
+  Serial.print("Left_motor_velocity:");Serial.print(motor_left.vel);Serial.print(" ");
+  //Serial.print("Roll_raw:");Serial.print(mpu.angle[0]);Serial.print(" ");
+  //Serial.print("Estimated_i_r:");Serial.print(estimator.x_pred(0,0));Serial.print(" ");
+  //Serial.print("Estimated_w_r:");Serial.print(estimator.x_pred(1,0));Serial.print(" ");
+  Serial.print("Estimated_i_l:");Serial.print(estimator.x_pred(2,0));Serial.print(" ");
+  Serial.print("Estimated_w_l:");Serial.print(estimator.x_pred(3,0));Serial.print(" ");
+  //Serial.print("Estimated_x:");Serial.print(estimator.x_pred(4,0));Serial.print(" ");
+  //Serial.print("Estimated_x_dot:");Serial.print(estimator.x_pred(5,0));Serial.print(" ");
+  //Serial.print("Estimated_theta:");Serial.print(estimator.x_pred(6,0));Serial.print(" ");
+  //Serial.print("Estimated_theta_dot:");Serial.print(estimator.x_pred(7,0));
+  Serial.println("\t");
+
+}
+
 
 void loop() { 
   
@@ -107,9 +131,9 @@ void loop() {
     bit = !bit;
     if (bit && automatic_ref){
       //bit = !bit;
-      //REF = 400.0;
+      REF = 400.0;
     }else if(!bit && automatic_ref){
-      //REF = -400.0;
+      REF = -400.0;
     }
   }
 
@@ -117,10 +141,6 @@ void loop() {
     timer_fired = false;
 
     mpu.read_values();
-  
-    
-    roll.predict(mpu.gyro[0]);
-    roll.update(mpu.angle[0]);
 
 
     uint32_t irq_state = spin_lock_blocking( slk );
@@ -128,51 +148,47 @@ void loop() {
     pid_right.set_gains(parameters[3],parameters[4],parameters[5]);
     spin_unlock(slk, irq_state);  // Unlock
 
+    measurement(0,0) = motor_right.vel;
+    measurement(1,0) = motor_left.vel;
+    measurement(2,0) += h_outer*measurement(3,0);
+    measurement(3,0) = WHEEL_RADIUS*motor_right.vel;
+    measurement(4,0) = mpu.angle[0];
+    measurement(5,0) = mpu.gyro[0];
 
 
 
+    control_action(0,0) = 12.0*duty_right/1000;
+    control_action(1,0) = 12.0*duty_left/1000;
+
+    estimator.predict(control_action);
+    estimator.update(measurement);
     
-    // left_velocity.predict(12.0*duty_left/1000);
-    // left_velocity.update(motor_left.vel);
+    
+    //duty_left = pid_left.control(REF,motor_left.vel);
+    //duty_right = pid_right.control(REF,motor_right.vel);
+    
+    motor_left.set_speed(duty_left);
+    motor_right.set_speed(duty_right);
 
-    
-    
-    duty_left = pid_left.control(REF,motor_left.vel);
-    duty_right = pid_right.control(REF,motor_right.vel);
-    
-
-    if (std::abs(mpu.angle[0]) > 10){
+    if (std::abs(mpu.angle[0]) > 25){
       duty_left = 0;
       duty_right = 0;
     }
-    motor_left.set_speed(duty_left);
-    motor_right.set_speed(duty_right);
     
     count++;
     if (count == h_outer) {
-      if (std::abs(mpu.angle[0]) > 0)  REF = tilt.control(0,mpu.angle[0]);
-      else REF = 0;
-      REF = -REF/2;
-      Serial.print("Time:");Serial.print(time_stamp);Serial.print("\t");
-      Serial.print("Duty:");Serial.print(12.0*duty_left/1000);Serial.print("\t");
-      Serial.print("Right_motor:");
-      Serial.print(motor_right.vel);
-      Serial.print("\t");
-      Serial.print("Left_motor:");
-      Serial.print(motor_left.vel);
-      Serial.print("\t");
-      Serial.print("REF:");
-      Serial.print(REF);
-      Serial.print("\t");
-      Serial.print("Angle:");
-      Serial.print(roll.x);
-      Serial.print("\t");
-      Serial.print("Angle_raw:");
-      Serial.print(mpu.angle[0]);
-      Serial.print("\t");
-      Serial.print("Error:");
-      Serial.print(-roll.x);
-      Serial.println("\t");
+      
+      if (!automatic_ref ){
+        //duty_right = duty_left;
+      }  
+      //else if (!automatic_ref)   REF = 0;
+      
+      if (!automatic_ref)  REF = -REF;
+      
+      
+      print_serial();
+      //estimator.verbose();
+
       time_stamp = time_stamp + h_outer/1000.0  ;
       count = 0;
     }

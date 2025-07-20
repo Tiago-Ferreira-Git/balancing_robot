@@ -2,45 +2,45 @@
 
 #include "kalman_filter.h"
 
-kalman::kalman(float A_,float B_,float Q_,float R_){
 
-    //h = h_;
+
+kalman::kalman(MatrixXd  A_, MatrixXd B_, MatrixXd C_, MatrixXd Q_, MatrixXd R_){
+
     A = A_;
+    A_t = A_.transpose();
     B = B_;
     Q = Q_;
     R = R_;
+    C = C_;
+    C_t = C_.transpose();
+    I = MatrixXd::Identity(A_.rows(), A_.rows());
+    x_pred = MatrixXd::Zero(A_.rows(),1);
+    P = MatrixXd::Identity(A_.rows(), A_.rows())*1;
 
 }
 
 
-void kalman::predict(float u){
+void kalman::predict(MatrixXd u){
 
     x_pred = A*x_pred+ B*u;
 
-    P_pred = A*P_pred*A + Q;
+    P = A*P*A_t + Q;
 
 }
 
 
 
-void kalman::update(float y){
+void kalman::update(MatrixXd y){
 
-    float error = y-x_pred;
+    MatrixXd error = y-C*x_pred;
 
-    P_meas = P_pred + R;
+    P_meas = C*P*C_t + R;
 
-    K = P_pred/P_meas;
+    L = P*C_t*P_meas.inverse();
 
-    x_pred = x_pred + K*error;
+    x_pred = x_pred + L*error;
 
-    P_pred = (1-K)*P_pred;
-
-    x = x_pred;
-
-    //Serial.print("Printing Kalman filter Error:");Serial.println(y-x_pred);
-
-
-
+    P = (I-L*C)*P;
 }
 
 
@@ -48,9 +48,16 @@ void kalman::verbose(){
 
 
     Serial.println("------- Printing Kalman filter info -----");
-    Serial.print("State update A: ");Serial.print(A);Serial.print(" State update B: ");Serial.println(B);
-    Serial.print("Predicted Covariance: ");Serial.print(P_pred);Serial.print("Kalman Gain: ");Serial.println(K);
+    Serial.println("Printing P: ");
+    for(int i = 0 ; i < P_meas.rows(); i++){
+        for(int j = 0 ; j < P_meas.cols(); j++){
 
+            Serial.print(P(i,j));
+            Serial.print(" ");
 
+        }
+        Serial.println("");
+    }
+    
 
 }
