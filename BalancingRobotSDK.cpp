@@ -50,7 +50,9 @@ int main(){
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN , GPIO_OUT);
   
-
+  
+  gpio_put(motor_right.IN_1, 1);
+  gpio_put(motor_right.IN_2, 0);
   motor_right.set_speed(REF); 
   
 
@@ -63,11 +65,41 @@ int main(){
         gpio_put(PICO_DEFAULT_LED_PIN, bit);
         prev_time = get_absolute_time();
         bit = !bit;
-
+        
+        if (counter == 5000){
+          REF = 0;
+        }else if(counter == 10000){
+          REF += 80;
+        }else if(counter == 15000){
+          REF -= 30;
+        }else if(counter == 20000){
+          REF -= 40;
+        }else if(counter == 25000){
+          REF += 50;
+        }else if(counter == 30000){
+          REF += 10;
+        }else if(counter == 35000){
+          REF -= 70;
+        }else if(counter == 40000){
+          REF += 45;
+        }else if(counter == 50000){
+          REF += 35;
+        }else if(counter == 60000){
+          REF -= 80;
+        }else if(counter == 70000){
+          REF += 20;
+        }
         Eigen::Matrix<double, 1, 1> vel(motor_right.vel);
 
-        duty_right = motor_right_pid.control(REF,motor_right.vel);
+        duty_right = 10*REF;
+        //pid_right.control(REF,motor_right.vel);
         Eigen::Matrix<double, 1, 1> control(12.0*duty_right/1000);
+
+        filter_3.predict(motor_right.vel);
+        filter_5.predict(motor_right.vel);
+        filter_10.predict(motor_right.vel);
+        filter_15.predict(motor_right.vel);
+        filter_20.predict(motor_right.vel);
 
         estimator.predict(control);
         
@@ -81,6 +113,12 @@ int main(){
         printf("%.3f\t",REF);
         printf("%d\t",duty_right);
         printf("%.3f\t",motor_right.vel);
+        printf("%.3f\t",filter_3.current_avg);
+        printf("%.3f\t",filter_5.current_avg);
+        printf("%.3f\t",filter_10.current_avg);
+        printf("%.3f\t",filter_15.current_avg);
+        printf("%.3f\t",filter_20.current_avg);
+        printf("%.3f\t",(estimator.C*estimator.x_pred).value());
         printf("\n");
         time_stamp = time_stamp + h_outer/1000.0 ;
         counter += 1; 

@@ -51,11 +51,15 @@ static int h_outer = h;
 double time_stamp = 0;
 
 
-motor motor_left(21,22,17,16,9);
+//motor motor_right(21,22,17,16,9);
 motor motor_right(11,13,6,7,10);
 kalman estimator(A, B, C , Q , R);
-average_moving_filter lp_filter(10); // Go to branch average moving filter 
-PID motor_right_pid(80, 0.1, 0, 0, 0, h/1000.0, 0, 0 , 1000); // K Ti Td N b h Tt
+average_moving_filter filter_3(3);
+average_moving_filter filter_5(5);
+average_moving_filter filter_10(10);
+average_moving_filter filter_15(15);
+average_moving_filter filter_20(20);
+PID pid_right(80, 0.1, 0, 0, 0, h/1000.0, 0, 0 , 1000); // K Ti Td N b h Tt
 double left_vel = 0.0;
 
 mpu6050 mpu(0x68);
