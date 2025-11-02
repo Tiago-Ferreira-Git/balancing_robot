@@ -10,3 +10,4 @@
 *.slx
 *.slxc
 *.xml
+build/

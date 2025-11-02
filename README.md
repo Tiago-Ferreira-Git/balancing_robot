@@ -24,6 +24,10 @@ To set up the development environment:
    git clone https://github.com/Tiago-Ferreira-Git/balancing_robot.git
    cd balancing_robot
 
+2. **Setup pico**:
+   - Go to Pico VS code extension;
+   - Select "Import Project";
+   - Build and select folder when prompt; 
 
 ## To do
 - Get an aluminium bar;
