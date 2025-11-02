@@ -1,10 +1,15 @@
 #ifndef _motor_H_
 #define _motor_H_
 
-#include "Arduino.h"
+#include <stdio.h>
+#include "pico/stdlib.h"
 #include "hardware/irq.h"
 #include "hardware/pwm.h"
-#include "pico/time.h"
+#include "hardware/gpio.h"
+#include <math.h>
+
+using namespace std;
+
 class motor
 {
 private:
@@ -18,9 +23,8 @@ public:
     uint8_t pwm = 0; //pwm pin to set velocity
 
     double vel = 0;
-    volatile long  int next = 0;
-    volatile long int prev = 0;
-    volatile long int diff = 0;
+    absolute_time_t next = 0;
+    absolute_time_t prev = 0;
     /*
         * @brief Costructor for class motor: atributes the parameters when the class is called to the private variables of the class
     */
@@ -45,7 +49,7 @@ public:
    void encoder_callback(uint , uint32_t );
     /*
     */
-   void set_speed(float );
+   void set_speed(int );
 
 
 };

@@ -1,22 +1,25 @@
 #ifndef _mpu6050_H_
 #define _mpu6050_H_
 
+#include <stdio.h>
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
+#include "pico/time.h"
 #include "hardware/i2c.h"
-#include "Arduino.h"
+#include <math.h>
 
+using namespace std;
 
 class mpu6050
 {
 private:
-    float gyro_drift[3] = {0.0,0.0,0.0}; 
-    float accel_drift[3] = {0.0,0.0,0.16};   
+    double gyro_drift[3] = {0.0,0.0,0.0}; 
+    double accel_drift[3] = {0.0,0.0,0.16};   
 public:
     uint8_t i2c_addr = 0x68; //i2c adress default: 0x68
-    float gyro[3] = {0.0,0.0,0.0};
-    float accel[3] = {0.0,0.0,0.0};
-    float angle[3] = {0.0,0.0,0.0};
+    double gyro[3] = {0.0,0.0,0.0};
+    double accel[3] = {0.0,0.0,0.0};
+    double angle[3] = {0.0,0.0,0.0};
 
     /*
         * @brief Costructor for class mpu6050: atributes the parameters when the class is called to the private variables of the class.

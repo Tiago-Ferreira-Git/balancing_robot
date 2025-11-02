@@ -1,7 +1,6 @@
 #ifndef _kalman_filter_H_
 #define _kalman_filter_H_
 
-#include "Arduino.h"
 #include <iostream>
 #include <Eigen/Dense>
 
@@ -17,8 +16,6 @@ private:
     MatrixXd A_t;
     // Control input matrix
     MatrixXd B;
-    // Output matrix
-    MatrixXd C;
     MatrixXd C_t;
     // Process noise covariance matrix
     MatrixXd Q;
@@ -37,6 +34,8 @@ private:
 public:
     // Predicted state vector
     MatrixXd x_pred;
+    // Output matrix
+    MatrixXd C;
 
 
     /*

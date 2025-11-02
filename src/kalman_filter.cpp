@@ -15,7 +15,8 @@ kalman::kalman(MatrixXd  A_, MatrixXd B_, MatrixXd C_, MatrixXd Q_, MatrixXd R_)
     C_t = C_.transpose();
     I = MatrixXd::Identity(A_.rows(), A_.rows());
     x_pred = MatrixXd::Zero(A_.rows(),1);
-    P = MatrixXd::Identity(A_.rows(), A_.rows())*1;
+    P = MatrixXd::Zero(A_.rows(), A_.rows());
+    L = MatrixXd::Zero(C.cols(), C.rows());
 
 }
 
@@ -47,17 +48,17 @@ void kalman::update(MatrixXd y){
 void kalman::verbose(){
 
 
-    Serial.println("------- Printing Kalman filter info -----");
-    Serial.println("Printing P: ");
-    for(int i = 0 ; i < P_meas.rows(); i++){
-        for(int j = 0 ; j < P_meas.cols(); j++){
+    // Serial.println("------- Printing Kalman filter info -----");
+    // Serial.println("Printing P: ");
+    // for(int i = 0 ; i < P_meas.rows(); i++){
+    //     for(int j = 0 ; j < P_meas.cols(); j++){
 
-            Serial.print(P(i,j));
-            Serial.print(" ");
+    //         Serial.print(P(i,j));
+    //         Serial.print(" ");
 
-        }
-        Serial.println("");
-    }
+    //     }
+    //     Serial.println("");
+    //}
     
 
 }

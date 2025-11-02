@@ -1,7 +1,8 @@
 #ifndef _PID_H_
 #define _PID_H_
 
-#include "Arduino.h"
+#include <stdio.h>
+#include "pico/stdlib.h"
 
 class PID {
  private:
@@ -10,12 +11,13 @@ class PID {
   float b = 0;      // Set Point Weighting
   float h = 0;      // time-step between control actions
   float y_old = 0;  // keep last value read
-  float N = 0;
+  float N = 20;
   float ad = 0;
   float bd = 0;
   float Tt = 0;  // anti-windup gain
   float REF_old = 0;
-  float limit = 0;
+  float limit_sup = 0;
+  float limit_inf = 0;
   bool anti_windup = false;
 
  public:
@@ -24,7 +26,7 @@ class PID {
    * called to the private variables of the class
    */
   explicit PID(float K_, float Ti_, float Td_, float N_, float b_, float h_,
-               float Tt_,float limit_);
+               float Tt_,  float limit_inf, float limit_sup);
   ~PID() {}
   /*
    * @brief Compute the proporcional term of the controller

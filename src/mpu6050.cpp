@@ -61,15 +61,15 @@ void mpu6050::std(int n,bool flag_accel){
 
 
 void mpu6050::calibration(int n,bool flag_accel){
-    float mean_accel[3] = {0.0,0.0,0.0};
-    float mean_gyro[3] = {0.0,0.0,0.0};
+    double mean_accel[3] = {0.0,0.0,0.0};
+    double mean_gyro[3] = {0.0,0.0,0.0};
     int n_meas = 10;
-    Serial.print("Starting Accelometer Calibration Process...");
+    printf("Starting Accelometer Calibration Process...");
     sleep_ms(100);
 
     if(flag_accel){
         for(int i = 0; i < n; i++){
-            Serial.print("Position ");Serial.print(": ");Serial.println(i+1);
+            printf("Position : ");printf("%d",i+1);
             sleep_ms(100);
             //Take 10 measurements compute the mean value
             for(int j = 0; j < n_meas; j++){
@@ -83,19 +83,19 @@ void mpu6050::calibration(int n,bool flag_accel){
                 mean_accel[k] = mean_accel[k]/n_meas;
             }
 
-            Serial.print("Acceleration X:");
-            Serial.print(mean_accel[0]);
-            Serial.print(" Acceleration Y:");
-            Serial.print(mean_accel[1]);
-            Serial.print(" Acceleration Z:");
-            Serial.println(mean_accel[2]);
+            printf("Acceleration X:");
+            printf("%f",mean_accel[0]);
+            printf(" Acceleration Y:");
+            printf("%f",mean_accel[1]);
+            printf(" Acceleration Z:");
+            printf("%f \n",mean_accel[2]);
 
             for(int k = 0; k < 3; k++){
                 mean_accel[k] = 0;
             }
         }
     }
-    Serial.println("Hold the board still. Starting Gyro Calibration Process...");
+    printf("Hold the board still. Starting Gyro Calibration Process...");
     sleep_ms(1000);
 
     n_meas = 10;
@@ -111,12 +111,12 @@ void mpu6050::calibration(int n,bool flag_accel){
         gyro_drift[k] = mean_gyro[k]/n_meas;
     }
 
-    Serial.print("Gyro offset X:");
-    Serial.print(gyro_drift[0]);
-    Serial.print(" Gyro offset Y:");
-    Serial.print(gyro_drift[1]);
-    Serial.print(" Gyro offset Z:");
-    Serial.println(gyro_drift[2]);
+    printf("Gyro offset X:");
+    printf("%f",gyro_drift[0]);
+    printf(" Gyro offset Y:");
+    printf("%f",gyro_drift[1]);
+    printf(" Gyro offset Z:");
+    printf("%f \n",gyro_drift[2]);
 
 
 }
@@ -133,14 +133,14 @@ void mpu6050::read_values(){
     for (int i = 0; i < 3; i++) {
 
         read =   (buffer[i * 2]<< 8 | buffer[(i * 2) + 1]);
-        accel[i] = (float)read/16384.0;
+        accel[i] = (double)read/16384.0;
         accel[i] -= accel_drift[i];       
     }
 
     //Roll
-    angle[0] = atan(accel[1]/sqrt(accel[0]*accel[0]+accel[2]*accel[2]))/(PI/180);
+    angle[0] = atan(accel[1]/sqrt(accel[0]*accel[0]+accel[2]*accel[2]))/(M_PI/180);
     //Pitch
-    angle[1] = -atan(accel[0]/sqrt(accel[1]*accel[1]+accel[2]*accel[2]))/ (PI/180);
+    angle[1] = -atan(accel[0]/sqrt(accel[1]*accel[1]+accel[2]*accel[2]))/ (M_PI/180);
 
     // Now gyro data from reg 0x43 for 6 bytes
     // The register is auto incrementing on each read
@@ -149,7 +149,7 @@ void mpu6050::read_values(){
 
     for (int i = 0; i < 3; i++) {
         read =   (buffer[i * 2]<< 8 | buffer[(i * 2) + 1]);    
-        gyro[i] = (float) read/65.5;
+        gyro[i] = (double) read/65.5;
         gyro[i] -= gyro_drift[i];
         
     }

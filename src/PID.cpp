@@ -2,7 +2,7 @@
 #include "PID.h"
 
 
-PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_,float limit_){
+PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_, float limit_inf_ , float limit_sup_){
   K = K_;
   Ti = Ti_;
   Td = Td_; 
@@ -12,7 +12,8 @@ PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_
   Tt = Tt_;
   ad = Td/(Td+N*h);
   bd = Td*K*N/(Td+N*h);
-  limit = limit_;
+  limit_inf = limit_inf_;
+  limit_sup = limit_sup_;
 }
 
 float PID::proporcional(float error){
@@ -36,18 +37,18 @@ float PID::control(float REF, float sensor_value){
   
 
   error = REF - sensor_value;
-  
-  //D = derivative(sensor_value);
+  //printf("%f",error);printf("\t");
   P = proporcional(error);
+  D = derivative(sensor_value);
   v = P + I;
   // + D;
 
-  if( v < -limit ) u = -limit;
-  else if( v > limit ) u = limit;
+  if( v < -limit_inf ) u = limit_inf;
+  else if( v > limit_sup ) u = limit_sup;
   else u = v;
   saturation_error = u-v;
   I += integrator(error,saturation_error); //back calculation slide 19
-  // y_old = sensor_value;
+  y_old = sensor_value;
   // P = u;
   // D = v;
 
@@ -66,15 +67,15 @@ int PID::get_anti_windup_state(){
 }
 
 void PID::print_pid_values(){
-  Serial.print(P);Serial.print(" ");
-  Serial.print(I);Serial.print(" ");
-  Serial.print(D);Serial.print(" ");
+  printf("%f",P);printf(" ");
+  printf("%f",I);printf(" ");
+  printf("%f \n",D);
 }
 
 void PID::print_gains(){
-  Serial.print(K);Serial.print(" ");
-  Serial.print(K/Ti);Serial.print(" ");
-  Serial.print(ad);Serial.print(" ");
+  printf("%f",K);printf(" ");
+  printf("%f",K/Ti);printf(" ");
+  printf("%f \n",ad);
 }
 
 
