@@ -63,7 +63,7 @@ target_link_libraries(BalancingRobotSDK
 target_include_directories(BalancingRobotSDK PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/include/
-        ${CMAKE_CURRENT_LIST_DIR}/lib/eigen-3.4.0/
+        ${CMAKE_CURRENT_LIST_DIR}/lib/eigen-5.0.1/
 )
 
 pico_add_extra_outputs(BalancingRobotSDK)

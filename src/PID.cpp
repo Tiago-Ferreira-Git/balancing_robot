@@ -1,86 +1,58 @@
 
 #include "PID.h"
 
-
-PID::PID(float K_, float Ti_, float Td_,float N_, float b_, float h_ , float Tt_, float limit_inf_ , float limit_sup_){
+PID::PID(Matrix<double, 2, 3>  K_, double h_, Matrix<double, 2, 1> limits_)
+{
   K = K_;
-  Ti = Ti_;
-  Td = Td_; 
-  N = N_;
-  b = b_;
   h = h_;
-  Tt = Tt_;
-  ad = Td/(Td+N*h);
-  bd = Td*K*N/(Td+N*h);
-  limit_inf = limit_inf_;
-  limit_sup = limit_sup_;
-}
+  limits = limits_;
 
-float PID::proporcional(float error){
-  return K*error;
 }
 
 
-float PID::integrator(float error,float saturation_error){
-  if(anti_windup) return h* (error * K/Ti + saturation_error/Tt);
-  return h* error * K/Ti;
-}
+Matrix<double, 2, 1> PID::control(Matrix<double, 2, 1> ref, Matrix<double, 2, 1> meas)
+{
+  Matrix<double, 2, 1> u = Matrix<double, 2, 1>::Zero();
+  Matrix<double, 2, 2> v = Matrix<double, 2, 2>::Zero();
+  Matrix<double, 2, 1> last_error = Matrix<double, 2, 1>::Zero();
 
-float PID::derivative(float y){
-  D = ad*D-bd*(y-y_old);
-  return  D;
-}
 
-float PID::control(float REF, float sensor_value){
-  float error = 0,saturation_error = 0;
-  float u = 0,v = 0;
+  last_error(0,0) = error(0,0);
+  last_error(1,0) = error(0,1);
+
+  error(0,0) = ref(0,0) - meas(0,0);
+  error(1,0) += error(0,0)*h;
+  error(2,0) = (error(0,0)-last_error(0,0))/h;
+
+  error(0,1) = ref(1,0) - meas(1,0);
+  error(1,1) += error(0,1)*h;
+  error(2,1) = (error(0,1)-last_error(1,0))/h;
+
+  v = K*error;
+
+  // while(true){
+  // printf(" %.3f\t", h);
+  // printf(" %.3f\t", meas(0,0));
+  // printf(" %.3f\t", error(0,0));
+  // printf(" %.3f\t", error(1,0));
+  // printf(" %.3f\t", error(2,0));
+  // printf(" %.3f\t", meas(1,0));
+  // printf(" %.3f\t", error(0,1));
+  // printf(" %.3f\t", error(1,1));
+  // printf(" %.3f\n", error(2,1));
+  //   sleep_ms(1);
+  // }
+
   
+  v(0,0) = std::max(v(0,0),limits(0,0));
+  v(0,0) = std::min(v(0,0),limits(1,0));
 
-  error = REF - sensor_value;
-  //printf("%f",error);printf("\t");
-  P = proporcional(error);
-  D = derivative(sensor_value);
-  v = P + I;
-  // + D;
+  v(1,1) = std::max(v(1,1),limits(0,0));
+  v(1,1) = std::min(v(1,1),limits(1,0));
 
-  if( v < -limit_inf ) u = limit_inf;
-  else if( v > limit_sup ) u = limit_sup;
-  else u = v;
-  saturation_error = u-v;
-  I += integrator(error,saturation_error); //back calculation slide 19
-  y_old = sensor_value;
-  // P = u;
-  // D = v;
-
-  //u = map(u, -1500, 1500, 0, 1000);
-
+  u(0,0) = int(std::round(v(0,0)));
+  u(1,0) = int(std::round(v(1,1)));
 
   return u;
 }
 
-void PID::set_anti_windup(bool to_set){
-  anti_windup = to_set;
-}
-
-int PID::get_anti_windup_state(){
-  return anti_windup;
-}
-
-void PID::print_pid_values(){
-  printf("%f",P);printf(" ");
-  printf("%f",I);printf(" ");
-  printf("%f \n",D);
-}
-
-void PID::print_gains(){
-  printf("%f",K);printf(" ");
-  printf("%f",K/Ti);printf(" ");
-  printf("%f \n",ad);
-}
-
-
-void PID::set_gains(double K_, double Ti_, double ad_){
-  K = K_;
-  Ti = Ti_;
-  ad = ad_;
-}
